@@ -1,19 +1,18 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google'; // Assuming Geist is locally configured as per initial files
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-// Removed AuthProvider, will use ClerkProvider
 import { Toaster } from '@/components/ui/toaster';
 import { siteConfig } from '@/config/site';
-import { ClerkProvider } from '@clerk/nextjs';
+import { FirebaseAuthProvider } from '@/components/auth/FirebaseAuthProvider'; // Updated Provider
 
-const geistSans = Geist({ // If Geist is local, this might need to be Inter or similar from next/font/google
+const geistSans = Geist({ 
   variable: '--font-geist-sans',
-  subsets: ['latin'], // Ensure subsets if using Google Fonts, or adjust if local
+  subsets: ['latin'], 
 });
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
-  subsets: ['latin'], // Ensure subsets
+  subsets: ['latin'], 
 });
 
 export const metadata: Metadata = {
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
     template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  icons: { // Example, replace with actual icons if available
+  icons: { 
     icon: '/favicon.ico', 
   }
 };
@@ -33,14 +32,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
-          {/* AuthProvider removed, ClerkProvider is now at the top level */}
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
+        <FirebaseAuthProvider> {/* Use Firebase Auth Provider */}
           {children}
           <Toaster />
-        </body>
-      </html>
-    </ClerkProvider>
+        </FirebaseAuthProvider>
+      </body>
+    </html>
   );
 }

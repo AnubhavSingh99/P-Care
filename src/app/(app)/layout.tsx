@@ -2,8 +2,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/nextjs'; // Using Clerk's useAuth
-import { useRouter } from 'next/navigation'; // Keep for potential client-side needs if any
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth'; // Using Firebase Auth
+import { useRouter } from 'next/navigation';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AppNavbar } from '@/components/layout/AppNavbar';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -14,20 +14,20 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isLoaded, userId } = useAuth(); // Using isLoaded and userId from Clerk
-  const router = useRouter(); // Keep router if needed for other purposes
+  const { user, isLoading } = useFirebaseAuth();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Middleware primarily handles route protection.
+  // FirebaseAuthProvider handles primary redirection.
   // This useEffect is a fallback or for scenarios where client-side redirect might be desired
-  // immediately after Clerk loads, though middleware should generally cover this.
+  // immediately after Firebase auth loads, though the provider should generally cover this.
   useEffect(() => {
-    if (isLoaded && !userId) {
+    if (!isLoading && !user) {
       router.replace('/auth/login');
     }
-  }, [isLoaded, userId, router]);
+  }, [isLoading, user, router]);
 
-  if (!isLoaded) {
+  if (isLoading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center space-y-4">
@@ -39,8 +39,8 @@ export default function AppLayout({
     );
   }
 
-  if (!userId) {
-    // This case should ideally be handled by the redirect in useEffect or middleware,
+  if (!user) {
+    // This case should ideally be handled by the redirect in useEffect or provider,
     // but as a fallback:
     return null; 
   }

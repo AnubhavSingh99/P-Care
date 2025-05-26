@@ -1,4 +1,4 @@
-import { SignIn } from '@clerk/nextjs';
+import { FirebaseLoginForm } from '@/components/auth/FirebaseLoginForm'; // Updated form
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center">
-      <SignIn path="/auth/login" routing="path" signUpUrl="/auth/signup" />
+      <FirebaseLoginForm />
     </div>
   );
 }

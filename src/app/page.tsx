@@ -3,25 +3,25 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs'; // Using Clerk's useAuth
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth'; // Using Firebase Auth
 import { Skeleton } from "@/components/ui/skeleton"; 
 
 export default function HomePage() {
-  const { userId, isLoaded } = useAuth(); // Get userId and isLoaded from Clerk
+  const { user, isLoading } = useFirebaseAuth(); // Get user and isLoading from Firebase Auth
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoaded) {
-      if (userId) { // If userId exists, user is authenticated
+    if (!isLoading) {
+      if (user) { 
         router.replace('/dashboard');
       } else {
         router.replace('/auth/login');
       }
     }
-  }, [userId, isLoaded, router]);
+  }, [user, isLoading, router]);
 
-  // Show a loading state while Clerk checks auth status
-  if (!isLoaded) {
+  // Show a loading state while Firebase checks auth status
+  if (isLoading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
          <div className="flex flex-col items-center space-y-4">
@@ -33,7 +33,7 @@ export default function HomePage() {
     );
   }
 
-  // If isLoaded is true, the redirect would have happened. 
+  // If isLoading is false, the redirect would have happened. 
   // This return is mostly a fallback or for the brief moment before redirect.
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-background">
