@@ -1,7 +1,7 @@
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Search } from 'lucide-react';
+import { PlusCircle, Search, Users } from 'lucide-react'; // Added Users icon
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
@@ -50,7 +50,7 @@ function PatientCard({ patient }: { patient: Patient }) {
 }
 
 export default function PatientsPage() {
-  // In a real app, patients would be fetched and filtered based on search query
+  // mockPatients will be an empty array
   const patients = mockPatients;
 
   return (
@@ -60,7 +60,7 @@ export default function PatientsPage() {
         description="Manage and view patient information."
         actions={
           <Button asChild>
-            <Link href="/patients/new"> {/* Assuming /patients/new will be the add patient page */}
+            <Link href="/patients/new"> 
               <PlusCircle className="mr-2 h-4 w-4" /> Add New Patient
             </Link>
           </Button>
@@ -76,7 +76,6 @@ export default function PatientsPage() {
             className="w-full rounded-lg bg-card pl-10 shadow-sm"
           />
         </div>
-        {/* Add filter options here if needed */}
       </div>
 
       {patients.length > 0 ? (
@@ -87,8 +86,11 @@ export default function PatientsPage() {
         </div>
       ) : (
         <div className="text-center py-10">
-          <p className="text-lg text-muted-foreground">No patients found.</p>
-          <p className="text-sm text-muted-foreground">Try adjusting your search or add a new patient.</p>
+          <Users className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-2 text-lg font-medium text-foreground">No Patients Found</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Start by adding a new patient record.
+          </p>
         </div>
       )}
     </div>

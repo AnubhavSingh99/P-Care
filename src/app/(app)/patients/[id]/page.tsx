@@ -12,9 +12,10 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
 
-// Function to generate metadata dynamically based on patient name
+// Function to generate metadata dynamically
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const patient = mockPatients.find(p => p.id === params.id);
+  // mockPatients will be an empty array, so patient will be undefined
+  const patient = mockPatients.find(p => p.id === params.id); 
   const patientName = patient ? patient.name : 'Patient';
   return {
     title: `${patientName} - Profile - ${siteConfig.name}`,
@@ -28,20 +29,21 @@ const getInitials = (name?: string) => {
   return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 };
 
-// Mock data - in a real app, this would be fetched from an API
+// In a real app, this would be fetched from an API/Firestore
 const getPatientData = async (id: string): Promise<Patient | undefined> => {
+  // mockPatients will be an empty array
   return mockPatients.find(p => p.id === id);
 };
 
 
 export default async function PatientProfilePage({ params }: { params: { id: string } }) {
-  const patient = await getPatientData(params.id);
+  const patient = await getPatientData(params.id); // patient will be undefined
 
   if (!patient) {
     return (
       <div className="text-center py-10">
         <h1 className="text-2xl font-bold">Patient not found</h1>
-        <p className="text-muted-foreground">The patient profile you are looking for does not exist.</p>
+        <p className="text-muted-foreground">The patient profile you are looking for does not exist or could not be loaded.</p>
         <Button asChild variant="link" className="mt-4">
           <Link href="/patients">
             <ArrowLeft className="mr-2 h-4 w-4" /> Go back to Patients List
@@ -51,6 +53,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
     );
   }
   
+  // These will be empty arrays
   const patientMedications = mockMedications.filter(med => med.patientId === patient.id);
   const patientAppointments = mockAppointments.filter(app => app.patientId === patient.id);
 
@@ -67,7 +70,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
               </Link>
             </Button>
             <Button asChild>
-              <Link href={`/patients/${patient.id}/edit`}> {/* Assuming edit page exists */}
+              <Link href={`/patients/${patient.id}/edit`}> 
                 <Edit3 className="mr-2 h-4 w-4" /> Edit Profile
               </Link>
             </Button>
@@ -168,8 +171,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
           <Card>
             <CardHeader><CardTitle>Visit Logs</CardTitle></CardHeader>
             <CardContent>
-              <p>Visit logs feature coming soon.</p>
-              {/* Placeholder for visit logs */}
+              <p>Visit logs feature will be implemented here.</p>
             </CardContent>
           </Card>
         </TabsContent>

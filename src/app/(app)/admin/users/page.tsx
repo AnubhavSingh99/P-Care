@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
-import { mockUsers } from '@/data/mock'; // Assuming mock users exist
+import { mockUsers } from '@/data/mock'; 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const metadata: Metadata = {
@@ -19,8 +19,7 @@ const getInitials = (name?: string) => {
 };
 
 export default function UserManagementPage() {
-  // This is a placeholder. In a real app, you'd fetch and manage users.
-  const users = mockUsers;
+  const users = mockUsers; // Will be an empty array now
 
   return (
     <div>
@@ -50,7 +49,7 @@ export default function UserManagementPage() {
               <TableRow key={user.id}>
                 <TableCell>
                    <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.avatarUrl || `https://placehold.co/100x100/B39DDB/FFFFFF?text=${getInitials(user.name)}`} alt={user.name} data-ai-hint="avatar person" />
+                    <AvatarImage src={user.avatarUrl || `https://placehold.co/100x100/B39DDB/FFFFFF?text=${getInitials(user.name)}`} alt={user.name || 'User avatar'} data-ai-hint="avatar person" />
                     <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                   </Avatar>
                 </TableCell>

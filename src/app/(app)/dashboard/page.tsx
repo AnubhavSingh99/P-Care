@@ -1,8 +1,9 @@
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Pill, CalendarCheck, AlertTriangle } from 'lucide-react';
+import { Users, Pill, CalendarCheck, AlertTriangle, Activity } from 'lucide-react'; // Added Activity icon
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
+import Link from 'next/link'; // Added Link import
 
 export const metadata: Metadata = {
   title: `Dashboard - ${siteConfig.name}`,
@@ -33,13 +34,14 @@ function StatCard({ title, value, icon: Icon, description, className }: StatCard
 
 
 export default function DashboardPage() {
-  // Mock data - replace with actual data fetching
   const stats = {
-    activePatients: 78,
-    upcomingAppointments: 12,
-    medicationsToReview: 5,
-    criticalAlerts: 2,
+    activePatients: 0,
+    upcomingAppointments: 0,
+    medicationsToReview: 0,
+    criticalAlerts: 0,
   };
+
+  const recentActivities: string[] = []; // Empty array for recent activities
 
   return (
     <div className="container mx-auto py-2">
@@ -52,28 +54,28 @@ export default function DashboardPage() {
           title="Active Patients" 
           value={stats.activePatients.toString()} 
           icon={Users}
-          description="+5 from last week"
+          description="Data will be fetched from Firestore."
           className="bg-card"
         />
         <StatCard 
           title="Upcoming Appointments" 
           value={stats.upcomingAppointments.toString()}
           icon={CalendarCheck}
-          description="3 today"
+          description="Data will be fetched from Firestore."
           className="bg-card"
         />
         <StatCard 
           title="Medications to Review" 
           value={stats.medicationsToReview.toString()}
           icon={Pill}
-          description="2 overdue"
+          description="Data will be fetched from Firestore."
           className="bg-card"
         />
         <StatCard 
           title="Critical Alerts" 
           value={stats.criticalAlerts.toString()}
           icon={AlertTriangle}
-          description="Needs immediate attention"
+          description="Data will be fetched from Firestore."
           className="border-destructive bg-destructive/10 text-destructive-foreground"
         />
       </div>
@@ -84,12 +86,19 @@ export default function DashboardPage() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-3">
-              <li className="text-sm">Dr. Smith updated Alice Wonderland&apos;s medication.</li>
-              <li className="text-sm">New patient Bob The Builder scheduled an appointment.</li>
-              <li className="text-sm">Nurse Jane Doe logged vitals for Charlie Brown.</li>
-            </ul>
-            {/* In a real app, this would be a dynamic list */}
+            {recentActivities.length > 0 ? (
+              <ul className="space-y-3">
+                {recentActivities.map((activity, index) => (
+                   <li key={index} className="text-sm">{activity}</li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-6">
+                <Activity className="mx-auto h-10 w-10 text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">No recent activity to display.</p>
+                <p className="text-xs text-muted-foreground">Activity logs will appear here once data is integrated.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card className="shadow-lg">
@@ -97,9 +106,9 @@ export default function DashboardPage() {
             <CardTitle>Quick Links</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col space-y-2">
-            <a href="/patients?filter=critical" className="text-primary hover:underline">View Critical Patients</a>
-            <a href="/appointments?date=today" className="text-primary hover:underline">Today&apos;s Appointments</a>
-            <a href="/patients/new" className="text-primary hover:underline">Add New Patient</a>
+            <Link href="/patients?filter=critical" className="text-primary hover:underline">View Critical Patients</Link>
+            <Link href="/appointments?date=today" className="text-primary hover:underline">Today&apos;s Appointments</Link>
+            <Link href="/patients/new" className="text-primary hover:underline">Add New Patient</Link>
           </CardContent>
         </Card>
       </div>

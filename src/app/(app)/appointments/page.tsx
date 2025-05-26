@@ -6,7 +6,7 @@ import { PlusCircle, CalendarDays, ListFilter } from 'lucide-react';
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
 import React from 'react';
-import { mockAppointments, mockPatients } from '@/data/mock'; // Assuming mock data
+import { mockAppointments, mockPatients } from '@/data/mock'; 
 import { Badge } from '@/components/ui/badge';
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 function AppointmentCalendarClient() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   
-  // Filter appointments for the selected date (example)
+  // mockAppointments and mockPatients will be empty arrays
   const selectedDateAppointments = mockAppointments.filter(app => 
     new Date(app.date).toDateString() === (date ? date.toDateString() : new Date().toDateString())
   ).map(app => {
@@ -98,7 +98,7 @@ export default function AppointmentsPage() {
           <CardTitle>Visit Logs</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Visit log recording feature coming soon. Consultation notes will appear here.</p>
+          <p className="text-muted-foreground">Visit log recording feature will be implemented here.</p>
         </CardContent>
       </Card>
     </div>

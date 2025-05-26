@@ -5,14 +5,14 @@ import { PlusCircle, Search, Pill } from 'lucide-react';
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
 import { Input } from '@/components/ui/input';
-import { mockMedications, mockPatients } from '@/data/mock'; // Assuming mock data exists
+import { mockMedications, mockPatients } from '@/data/mock'; 
 
 export const metadata: Metadata = {
   title: `Medication Tracker - ${siteConfig.name}`,
 };
 
 export default function MedicationsPage() {
-  // This is a placeholder. In a real app, you'd fetch and manage medications.
+  // mockMedications and mockPatients will be empty arrays
   const medicationsWithPatientNames = mockMedications.map(med => {
     const patient = mockPatients.find(p => p.id === med.patientId);
     return { ...med, patientName: patient ? patient.name : 'Unknown Patient' };
@@ -58,7 +58,6 @@ export default function MedicationsPage() {
                 <p className="text-sm"><strong>Start Date:</strong> {new Date(med.startDate).toLocaleDateString()}</p>
                 {med.notes && <p className="text-xs text-muted-foreground italic">Notes: {med.notes}</p>}
               </CardContent>
-              {/* Add actions like Edit/Delete if necessary */}
             </Card>
           ))}
         </div>
