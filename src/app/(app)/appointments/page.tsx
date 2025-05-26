@@ -28,7 +28,7 @@ function AppointmentCalendarClient() {
   ).map(app => {
     const patient = mockPatients.find(p => p.id === app.patientId);
     return { ...app, patientName: patient ? patient.name : 'Unknown Patient' };
-  });; // Explicit semicolon added here
+  }); // Added semicolon here
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
