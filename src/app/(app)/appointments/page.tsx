@@ -1,29 +1,34 @@
+
+"use client"; // Add this directive
+
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar'; // Shadcn calendar
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlusCircle, CalendarDays, ListFilter } from 'lucide-react';
-import type { Metadata } from 'next';
+// import type { Metadata } from 'next'; // Not used in client component
 import { siteConfig } from '@/config/site';
 import React from 'react';
-import { mockAppointments, mockPatients } from '@/data/mock'; 
+import { mockAppointments, mockPatients } from '@/data/mock';
 import { Badge } from '@/components/ui/badge';
 
-export const metadata: Metadata = {
-  title: `Appointment Scheduling - ${siteConfig.name}`,
-};
+// Metadata needs to be exported from server components or handled differently for client components
+// For client components, you typically set document.title in a useEffect hook.
+// export const metadata: Metadata = {
+//   title: `Appointment Scheduling - ${siteConfig.name}`,
+// };
 
 // Client component to handle calendar state
 function AppointmentCalendarClient() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
-  
+
   // mockAppointments and mockPatients will be empty arrays
-  const selectedDateAppointments = mockAppointments.filter(app => 
+  const selectedDateAppointments = mockAppointments.filter(app =>
     new Date(app.date).toDateString() === (date ? date.toDateString() : new Date().toDateString())
   ).map(app => {
     const patient = mockPatients.find(p => p.id === app.patientId);
     return { ...app, patientName: patient ? patient.name : 'Unknown Patient' };
-  });
+  });; // Explicit semicolon added here
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -45,7 +50,7 @@ function AppointmentCalendarClient() {
         <CardHeader>
           <CardTitle>
             Appointments for {date ? date.toLocaleDateString() : new Date().toLocaleDateString()}
-          </CardTitle>
+          </Title>
         </CardHeader>
         <CardContent>
           {selectedDateAppointments.length > 0 ? (
@@ -76,6 +81,10 @@ function AppointmentCalendarClient() {
 
 
 export default function AppointmentsPage() {
+  React.useEffect(() => {
+    document.title = `Appointment Scheduling - ${siteConfig.name}`;
+  }, []);
+
   return (
     <div>
       <PageHeader
