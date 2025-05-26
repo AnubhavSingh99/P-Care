@@ -1,6 +1,15 @@
 // src/lib/firebase.ts
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
+import { 
+  getAuth, 
+  type Auth,
+  GoogleAuthProvider,
+  PhoneAuthProvider,
+  RecaptchaVerifier,
+  signInWithPopup,
+  signInWithPhoneNumber,
+  onAuthStateChanged // Keep this if used directly elsewhere, good for consistency
+} from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 // import { getAnalytics } from "firebase/analytics"; // Optional: if you want to use Analytics
 
@@ -33,4 +42,14 @@ db = getFirestore(app);
 //   analytics = getAnalytics(app);
 // }
 
-export { app, auth, db };
+export { 
+  app, 
+  auth, 
+  db, 
+  GoogleAuthProvider, 
+  PhoneAuthProvider, 
+  RecaptchaVerifier, 
+  signInWithPopup, 
+  signInWithPhoneNumber,
+  onAuthStateChanged 
+};
