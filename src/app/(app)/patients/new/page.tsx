@@ -52,7 +52,7 @@ export default function AddNewPatientPage() {
     resolver: zodResolver(patientFormSchema),
     defaultValues: {
       name: '',
-      age: undefined, 
+      age: '' as unknown as number, // Initialize with empty string to avoid uncontrolled input warning
       gender: undefined,
       contact: '',
       allergies: '',
