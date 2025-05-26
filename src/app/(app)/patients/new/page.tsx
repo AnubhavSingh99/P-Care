@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from '@/hooks/use-toast';
-import type { Patient } from '@/types'; // Assuming Patient type is defined here
+import type { Patient } from '@/types'; 
 
 const patientFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }).max(100),
@@ -33,7 +33,7 @@ const patientFormSchema = z.object({
   contact: z.string().min(5, { message: "Contact information is too short." }).max(100),
   allergies: z.string().optional(),
   medicalHistory: z.string().optional(),
-  currentCondition: z.string().optional().max(1000, "Condition description is too long."),
+  currentCondition: z.string().max(1000, "Condition description is too long.").optional(),
   ongoingTreatments: z.string().optional(),
   lastVisit: z.date().optional(),
   nextFollowUp: z.date().optional(),
@@ -52,7 +52,7 @@ export default function AddNewPatientPage() {
     resolver: zodResolver(patientFormSchema),
     defaultValues: {
       name: '',
-      age: undefined, // Will be coerced to number
+      age: undefined, 
       gender: undefined,
       contact: '',
       allergies: '',
@@ -323,7 +323,7 @@ export default function AddNewPatientPage() {
                             selected={field.value}
                             onSelect={field.onChange}
                              disabled={(date) =>
-                              date < new Date()
+                              date < new Date() 
                             }
                             initialFocus
                           />
@@ -380,4 +380,3 @@ export default function AddNewPatientPage() {
     </div>
   );
 }
- 
