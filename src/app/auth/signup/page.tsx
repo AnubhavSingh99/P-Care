@@ -1,4 +1,4 @@
-import { SignupForm } from '@/components/auth/SignupForm';
+import { SignUp } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
 
@@ -8,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function SignupPage() {
-  return <SignupForm />;
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <SignUp path="/auth/signup" routing="path" signInUrl="/auth/login" />
+    </div>
+  );
 }

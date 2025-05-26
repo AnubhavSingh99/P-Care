@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google'; // Assuming Geist is locally configured as per initial files
 import './globals.css';
-import { AuthProvider } from '@/components/auth/AuthContext';
+// Removed AuthProvider, will use ClerkProvider
 import { Toaster } from '@/components/ui/toaster';
 import { siteConfig } from '@/config/site';
+import { ClerkProvider } from '@clerk/nextjs';
 
 const geistSans = Geist({ // If Geist is local, this might need to be Inter or similar from next/font/google
   variable: '--font-geist-sans',
@@ -32,13 +33,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
-        <AuthProvider>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
+          {/* AuthProvider removed, ClerkProvider is now at the top level */}
           {children}
           <Toaster />
-        </AuthProvider>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

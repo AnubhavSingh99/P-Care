@@ -2,31 +2,32 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/auth/useAuth';
+import { useAuth } from '@clerk/nextjs'; // Using Clerk's useAuth
+import { useRouter } from 'next/navigation'; // Keep for potential client-side needs if any
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AppNavbar } from '@/components/layout/AppNavbar';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'; // SheetTrigger won't be used directly here.
-import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton'; // For loading state
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
+  const { isLoaded, userId } = useAuth(); // Using isLoaded and userId from Clerk
+  const router = useRouter(); // Keep router if needed for other purposes
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Middleware primarily handles route protection.
+  // This useEffect is a fallback or for scenarios where client-side redirect might be desired
+  // immediately after Clerk loads, though middleware should generally cover this.
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isLoaded && !userId) {
       router.replace('/auth/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isLoaded, userId, router]);
 
-  if (isLoading) {
+  if (!isLoaded) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center space-y-4">
@@ -38,8 +39,9 @@ export default function AppLayout({
     );
   }
 
-  if (!isAuthenticated) {
-    // This case should ideally be handled by the redirect, but as a fallback:
+  if (!userId) {
+    // This case should ideally be handled by the redirect in useEffect or middleware,
+    // but as a fallback:
     return null; 
   }
   
@@ -54,8 +56,7 @@ export default function AppLayout({
 
       {/* Mobile Sidebar (Sheet) */}
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-        {/* SheetTrigger is handled by the Menu button in AppNavbar */}
-        <SheetContent side="left" className="w-64 p-0 border-r-0"> {/* Remove padding and border for full custom sidebar */}
+        <SheetContent side="left" className="w-64 p-0 border-r-0">
           <AppSidebar isMobile={true} onToggle={toggleMobileMenu} />
         </SheetContent>
       </Sheet>

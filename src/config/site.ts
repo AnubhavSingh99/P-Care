@@ -35,14 +35,17 @@ export const navMenuItems: NavItem[] = [
     label: 'HIPAA Compliance',
     href: '/compliance',
     icon: ShieldAlert,
-    roles: ['admin'],
+    roles: ['admin'], // Assuming this is an admin-only section
   },
   {
     label: 'User Management',
-    href: '/admin/users',
+    href: '/admin/users', // This page lists mock users, not directly tied to Clerk roles for display
     icon: Settings,
     roles: ['admin'],
   },
 ];
 
-export const defaultUserRole: UserRole = 'doctor';
+// defaultUserRole is no longer needed as Clerk handles user sessions and roles.
+// export const defaultUserRole: UserRole = 'doctor'; 
+// Roles for navigation are now derived from Clerk user's publicMetadata.
+// Ensure your Clerk user publicMetadata is set, e.g., { "role": "doctor" }
