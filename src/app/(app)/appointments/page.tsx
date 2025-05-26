@@ -1,34 +1,36 @@
 
-"use client"; // Add this directive
+"use client"; 
 
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar'; // Shadcn calendar
+import { Calendar } from '@/components/ui/calendar'; 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, CalendarDays, ListFilter } from 'lucide-react';
-// import type { Metadata } from 'next'; // Not used in client component
+import { PlusCircle, ListFilter } from 'lucide-react';
 import { siteConfig } from '@/config/site';
-import React from 'react';
-import { mockAppointments, mockPatients } from '@/data/mock';
+import React, { useState, useEffect } from 'react'; // Combined useState and useEffect
+import { mockAppointments, mockPatients } from '@/data/mock'; // These are empty arrays
 import { Badge } from '@/components/ui/badge';
+import type { Appointment } from '@/types'; // Import Appointment type
 
-// Metadata needs to be exported from server components or handled differently for client components
-// For client components, you typically set document.title in a useEffect hook.
-// export const metadata: Metadata = {
-//   title: `Appointment Scheduling - ${siteConfig.name}`,
-// };
+interface DisplayAppointment extends Appointment {
+  patientName: string;
+}
 
-// Client component to handle calendar state
 function AppointmentCalendarClient() {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [displayedAppointments, setDisplayedAppointments] = useState<DisplayAppointment[]>([]);
 
-  // mockAppointments and mockPatients will be empty arrays
-  const selectedDateAppointments = mockAppointments.filter(app =>
-    new Date(app.date).toDateString() === (date ? date.toDateString() : new Date().toDateString())
-  ).map(app => {
-    const patient = mockPatients.find(p => p.id === app.patientId);
-    return { ...app, patientName: patient ? patient.name : 'Unknown Patient' };
-  }); // Added semicolon here
+  useEffect(() => {
+    const targetDateString = date ? date.toDateString() : new Date().toDateString();
+    
+    const appointmentsForDate = mockAppointments
+      .filter(app => new Date(app.date).toDateString() === targetDateString)
+      .map(app => {
+        const patient = mockPatients.find(p => p.id === app.patientId);
+        return { ...app, patientName: patient ? patient.name : 'Unknown Patient' };
+      });
+    setDisplayedAppointments(appointmentsForDate as DisplayAppointment[]);
+  }, [date]); // mockAppointments and mockPatients are stable dependencies (empty arrays)
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -50,12 +52,12 @@ function AppointmentCalendarClient() {
         <CardHeader>
           <CardTitle>
             Appointments for {date ? date.toLocaleDateString() : new Date().toLocaleDateString()}
-          </Title>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {selectedDateAppointments.length > 0 ? (
+          {displayedAppointments.length > 0 ? (
             <ul className="space-y-3">
-              {selectedDateAppointments.map(app => (
+              {displayedAppointments.map(app => (
                 <li key={app.id} className="rounded-md border p-3">
                   <div className="flex justify-between items-start">
                     <div>
@@ -81,7 +83,7 @@ function AppointmentCalendarClient() {
 
 
 export default function AppointmentsPage() {
-  React.useEffect(() => {
+  useEffect(() => {
     document.title = `Appointment Scheduling - ${siteConfig.name}`;
   }, []);
 
