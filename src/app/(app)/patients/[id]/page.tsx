@@ -155,7 +155,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
                     <li key={app.id} className="rounded-md border p-3">
                       <p className="font-semibold">{new Date(app.date).toLocaleDateString()} at {app.time} with {app.doctorName}</p>
                       <p className="text-sm text-muted-foreground">Reason: {app.reason}</p>
-                      <p className="text-sm capitalize"><Badge variant={app.status === 'completed' ? 'default' : app.status === 'cancelled' ? 'destructive' : 'secondary'}>{app.status}</Badge></p>
+                      <div className="text-sm capitalize"><Badge variant={app.status === 'completed' ? 'default' : app.status === 'cancelled' ? 'destructive' : 'secondary'}>{app.status}</Badge></div>
                     </li>
                   ))}
                 </ul>
