@@ -6,9 +6,9 @@ import {
   GoogleAuthProvider,
   PhoneAuthProvider,
   RecaptchaVerifier,
-  signInWithPopup,
+  signInWithPopup, 
   signInWithPhoneNumber,
-  onAuthStateChanged // Keep this if used directly elsewhere, good for consistency
+  onAuthStateChanged 
 } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 // import { getAnalytics } from "firebase/analytics"; // Optional: if you want to use Analytics
@@ -23,18 +23,41 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, // Optional
 };
 
+// Log the config to ensure it's loaded correctly
+if (typeof window !== 'undefined') { // Log only on the client-side
+  console.log("Firebase Config Initializing in firebase.ts:", {
+    apiKeyLoaded: firebaseConfig.apiKey ? 'Exists' : 'MISSING or UNDEFINED',
+    authDomain: firebaseConfig.authDomain,
+    projectId: firebaseConfig.projectId,
+  });
+}
+
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 
 if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
+  try {
+    app = initializeApp(firebaseConfig);
+  } catch (error) {
+    console.error("Error initializing Firebase app:", error);
+    // Prevent further Firebase calls if initialization fails
+    throw error; 
+  }
 } else {
   app = getApps()[0];
 }
 
-auth = getAuth(app);
-db = getFirestore(app);
+try {
+  auth = getAuth(app);
+  db = getFirestore(app);
+} catch (error) {
+  console.error("Error getting Auth or Firestore instance:", error);
+  // Depending on the app's needs, you might want to handle this differently
+  // For now, rethrow to make it visible.
+  throw error;
+}
+
 
 // Optional: Initialize Analytics
 // let analytics;
