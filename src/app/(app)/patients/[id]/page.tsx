@@ -1,27 +1,22 @@
-// src/app/(app)/patients/[id]/page.tsx
+
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { useParams, useRouter } from 'next/navigation'; // useRouter for potential redirect
+
 import { PageHeader } from '@/components/PageHeader';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockPatients, mockMedications, mockAppointments } from '@/data/mock';
-import type { Patient } from '@/types';
-import { ArrowLeft, Edit3, CalendarDays, Pill, FileText, ClipboardList } from 'lucide-react';
+import type { Patient, Medication, Appointment } from '@/types'; // Keep Medication, Appointment for future
+import { ArrowLeft, Edit3, CalendarDays, Pill, FileText, ClipboardList, Loader2, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
-import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
-
-// Function to generate metadata dynamically
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  // mockPatients will be an empty array, so patient will be undefined
-  const patient = mockPatients.find(p => p.id === params.id); 
-  const patientName = patient ? patient.name : 'Patient';
-  return {
-    title: `${patientName} - Profile - ${siteConfig.name}`,
-  };
-}
-
 
 // Helper function to get initials
 const getInitials = (name?: string) => {
@@ -29,22 +24,101 @@ const getInitials = (name?: string) => {
   return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 };
 
-// In a real app, this would be fetched from an API/Firestore
-const getPatientData = async (id: string): Promise<Patient | undefined> => {
-  // mockPatients will be an empty array
-  return mockPatients.find(p => p.id === id);
-};
+export default function PatientProfilePage() {
+  const { user, isLoading: authIsLoading } = useFirebaseAuth();
+  const params = useParams();
+  const router = useRouter(); // For redirecting if access is denied
+  const patientId = params.id as string;
 
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function PatientProfilePage({ params }: { params: { id: string } }) {
-  const patient = await getPatientData(params.id); // patient will be undefined
+  // Mock data for medications and appointments - to be replaced with Firestore fetching later
+  const patientMedications: Medication[] = [];
+  const patientAppointments: Appointment[] = [];
+  
+  useEffect(() => {
+    if (patient) {
+      document.title = `${patient.name} - Profile - ${siteConfig.name}`;
+    } else if (error) {
+       document.title = `Error - ${siteConfig.name}`;
+    } else {
+       document.title = `Loading Patient - ${siteConfig.name}`;
+    }
+  }, [patient, error]);
 
-  if (!patient) {
+  useEffect(() => {
+    if (authIsLoading) {
+      setIsLoading(true);
+      return;
+    }
+
+    if (!user) {
+      // If user is not authenticated, redirect or show error
+      // This case should ideally be handled by the AppLayout's auth check
+      setError("Authentication required.");
+      setIsLoading(false);
+      // Optionally redirect: router.replace('/auth/login');
+      return;
+    }
+
+    if (!patientId) {
+      setError("Patient ID is missing.");
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchPatient = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const patientDocRef = doc(db, 'patients', patientId);
+        const patientDocSnap = await getDoc(patientDocRef);
+
+        if (patientDocSnap.exists()) {
+          const patientData = { id: patientDocSnap.id, ...patientDocSnap.data() } as Patient;
+          // Security Check: Ensure the logged-in user owns this patient record
+          if (patientData.userId === user.uid) {
+            setPatient(patientData);
+          } else {
+            setError("Access Denied. You do not have permission to view this patient's profile.");
+            setPatient(null); // Clear any potentially loaded patient data
+          }
+        } else {
+          setError("Patient not found. The profile may not exist or you may not have access.");
+          setPatient(null);
+        }
+      } catch (err) {
+        console.error("Error fetching patient: ", err);
+        setError("Failed to load patient profile. Please try again.");
+        setPatient(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPatient();
+  }, [user, authIsLoading, patientId, router]);
+
+  if (isLoading || authIsLoading) {
+    return (
+      <div className="flex justify-center items-center h-[calc(100vh-150px)]"> {/* Adjust height as needed */}
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="ml-3 text-lg">Loading patient profile...</p>
+      </div>
+    );
+  }
+
+  if (error) {
     return (
       <div className="text-center py-10">
-        <h1 className="text-2xl font-bold">Patient not found</h1>
-        <p className="text-muted-foreground">The patient profile you are looking for does not exist or could not be loaded.</p>
-        <Button asChild variant="link" className="mt-4">
+        <ShieldAlert className="mx-auto h-16 w-16 text-destructive mb-4" />
+        <h1 className="text-2xl font-bold text-destructive">{error.includes("Access Denied") ? "Access Denied" : "Error"}</h1>
+        <p className="text-muted-foreground mt-2">
+          {error.includes("Patient not found") ? "The patient profile you are looking for does not exist or could not be loaded." : error}
+        </p>
+        <Button asChild variant="outline" className="mt-6">
           <Link href="/patients">
             <ArrowLeft className="mr-2 h-4 w-4" /> Go back to Patients List
           </Link>
@@ -53,9 +127,20 @@ export default async function PatientProfilePage({ params }: { params: { id: str
     );
   }
   
-  // These will be empty arrays
-  const patientMedications = mockMedications.filter(med => med.patientId === patient.id);
-  const patientAppointments = mockAppointments.filter(app => app.patientId === patient.id);
+  if (!patient) {
+     // This case should ideally be covered by isLoading or error state, but as a fallback:
+    return (
+      <div className="text-center py-10">
+        <h1 className="text-2xl font-bold">Patient data unavailable</h1>
+        <p className="text-muted-foreground">Could not load patient details.</p>
+         <Button asChild variant="link" className="mt-4">
+          <Link href="/patients">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Go back to Patients List
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -143,7 +228,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
                     </li>
                   ))}
                 </ul>
-              ) : <p>No medications prescribed for this patient.</p>}
+              ) : <p>No medications prescribed for this patient yet. This section will populate once medication data is fetched.</p>}
             </CardContent>
           </Card>
         </TabsContent>
@@ -162,7 +247,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
                     </li>
                   ))}
                 </ul>
-              ) : <p>No appointments scheduled for this patient.</p>}
+              ) : <p>No appointments scheduled for this patient yet. This section will populate once appointment data is fetched.</p>}
             </CardContent>
           </Card>
         </TabsContent>
@@ -171,7 +256,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
           <Card>
             <CardHeader><CardTitle>Visit Logs</CardTitle></CardHeader>
             <CardContent>
-              <p>Visit logs feature will be implemented here.</p>
+              <p>Visit logs feature will be implemented here. This section will populate once visit log data is fetched.</p>
             </CardContent>
           </Card>
         </TabsContent>

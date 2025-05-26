@@ -1,19 +1,27 @@
+
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { collection, query, where, getDocs, DocumentData } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Search, Users } from 'lucide-react'; // Added Users icon
+import { PlusCircle, Search, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
-import { mockPatients } from '@/data/mock';
 import type { Patient } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-export const metadata: Metadata = {
-  title: `Patients - ${siteConfig.name}`,
-};
+// Metadata is typically for server components. For client components, you might set document.title
+// export const metadata: Metadata = {
+//   title: `Patients - ${siteConfig.name}`,
+// };
 
 function PatientCard({ patient }: { patient: Patient }) {
   const getInitials = (name?: string) => {
@@ -50,8 +58,53 @@ function PatientCard({ patient }: { patient: Patient }) {
 }
 
 export default function PatientsPage() {
-  // mockPatients will be an empty array
-  const patients = mockPatients;
+  const { user, isLoading: authIsLoading } = useFirebaseAuth();
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    document.title = `Patients - ${siteConfig.name}`;
+  }, []);
+
+  useEffect(() => {
+    if (authIsLoading) {
+      setIsLoading(true);
+      return;
+    }
+    if (!user) {
+      setIsLoading(false);
+      setPatients([]); // Clear patients if user logs out
+      return;
+    }
+
+    const fetchPatients = async () => {
+      setIsLoading(true);
+      try {
+        const patientsRef = collection(db, 'patients');
+        const q = query(patientsRef, where('userId', '==', user.uid));
+        const querySnapshot = await getDocs(q);
+        const fetchedPatients: Patient[] = [];
+        querySnapshot.forEach((doc) => {
+          fetchedPatients.push({ id: doc.id, ...doc.data() } as Patient);
+        });
+        setPatients(fetchedPatients);
+      } catch (error) {
+        console.error("Error fetching patients: ", error);
+        // Handle error appropriately, e.g., show a toast message
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, [user, authIsLoading]);
+
+  const filteredPatients = patients.filter(patient => 
+    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (patient.currentCondition && patient.currentCondition.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    patient.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
@@ -74,13 +127,20 @@ export default function PatientsPage() {
             type="search" 
             placeholder="Search patients by name, ID, or condition..." 
             className="w-full rounded-lg bg-card pl-10 shadow-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
-      {patients.length > 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center py-10">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="ml-2">Loading patient records...</p>
+        </div>
+      ) : filteredPatients.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {patients.map((patient) => (
+          {filteredPatients.map((patient) => (
             <PatientCard key={patient.id} patient={patient} />
           ))}
         </div>
@@ -89,7 +149,7 @@ export default function PatientsPage() {
           <Users className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-2 text-lg font-medium text-foreground">No Patients Found</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Start by adding a new patient record.
+            {searchTerm ? "No patients match your search criteria." : "Start by adding a new patient record for this user."}
           </p>
         </div>
       )}
