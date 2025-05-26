@@ -2,6 +2,7 @@ import type { SVGProps } from 'react';
 import Link from 'next/link';
 import { Stethoscope } from 'lucide-react'; // Using Stethoscope as a relevant icon
 import { siteConfig } from '@/config/site';
+import { cn } from '@/lib/utils'; // Added import for cn
 
 interface AppLogoProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
   iconOnly?: boolean;
