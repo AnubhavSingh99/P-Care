@@ -1,10 +1,12 @@
+
 import type { LucideIcon } from 'lucide-react';
 import type { User as FirebaseUser } from 'firebase/auth';
 
 export type UserRole = 'doctor' | 'nurse' | 'admin';
 
+// This extends the FirebaseUser type to include our custom 'role'
 export interface User extends FirebaseUser {
-  role?: UserRole;
+  role?: UserRole; // Role might be undefined until fetched from Firestore
 }
 
 export interface Patient {
@@ -22,6 +24,7 @@ export interface Patient {
   lastVisit?: string; // ISO date string
   nextFollowUp?: string; // ISO date string
   isCritical?: boolean;
+  createdAt: string; // ISO date string, added for sorting/recent activity
 }
 
 export interface Medication {
@@ -41,9 +44,9 @@ export interface Appointment {
   userId: string; // ID of the user who owns this appointment
   patientId: string;
   patientName?: string; // For easier display
-  doctorId: string; 
+  doctorId: string;
   doctorName?: string; // For easier display
-  date: string; // ISO date string
+  date: string; // ISO date string e.g., "YYYY-MM-DD"
   time: string; // e.g., "10:00 AM"
   reason: string;
   notes?: string;
@@ -64,5 +67,5 @@ export interface VisitLog {
   patientId: string;
   date: string; // ISO date string
   notes: string;
-  doctorId: string; 
+  doctorId: string;
 }

@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from '@/hooks/use-toast';
-import type { Patient } from '@/types'; 
+import type { Patient } from '@/types';
 
 const patientFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }).max(100),
@@ -90,6 +90,7 @@ export default function AddNewPatientPage() {
         lastVisit: data.lastVisit ? data.lastVisit.toISOString() : undefined,
         nextFollowUp: data.nextFollowUp ? data.nextFollowUp.toISOString() : undefined,
         isCritical: data.isCritical || false,
+        createdAt: new Date().toISOString(), // Add createdAt timestamp
         // avatarUrl can be added later if an upload feature is implemented
       };
 
@@ -147,7 +148,7 @@ export default function AddNewPatientPage() {
                     <FormItem>
                       <FormLabel>Age</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 35" {...field} />
+                        <Input type="number" placeholder="e.g., 35" {...field} value={field.value === undefined || field.value === null ? '' : field.value} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -233,7 +234,7 @@ export default function AddNewPatientPage() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="ongoingTreatments"
@@ -323,7 +324,7 @@ export default function AddNewPatientPage() {
                             selected={field.value}
                             onSelect={field.onChange}
                              disabled={(date) =>
-                              date < new Date() 
+                              date < new Date()
                             }
                             initialFocus
                           />
@@ -334,7 +335,7 @@ export default function AddNewPatientPage() {
                   )}
                 />
               </div>
-              
+
               <FormField
                 control={form.control}
                 name="isCritical"
@@ -357,7 +358,7 @@ export default function AddNewPatientPage() {
                   </FormItem>
                 )}
               />
-              
+
               <div className="flex justify-end space-x-3">
                 <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
                   Cancel
