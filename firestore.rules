@@ -1,0 +1,57 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users collection:
+    // - Users can read and update their own profile.
+    // - Users can create their own profile document (e.g., on signup).
+    match /users/{userId} {
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // For admin capabilities (e.g., an admin viewing any user profile),
+      // you'd need more complex rules, possibly checking custom claims or an admin collection.
+    }
+
+    // Helper function to check ownership based on a userId field in the document
+    function isOwner(docUserId) {
+      return request.auth != null && request.auth.uid == docUserId;
+    }
+
+    // Patients data:
+    // - Users can create patient records if the patient's userId matches their own.
+    // - Users can read, update, or delete patient records they own.
+    match /patients/{patientId} {
+      allow read, update, delete: if isOwner(resource.data.userId);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Medications data:
+    // - Users can create medication records if the medication's userId matches their own.
+    // - Users can read, update, or delete medication records they own.
+    match /medications/{medicationId} {
+      allow read, update, delete: if isOwner(resource.data.userId);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Appointments data:
+    // - Users can create appointments if the appointment's userId matches their own.
+    // - Users can read, update, or delete appointments they own.
+    match /appointments/{appointmentId} {
+      allow read, update, delete: if isOwner(resource.data.userId);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    
+    // VisitLogs data:
+    // - Assuming visit logs also have a userId for the creator/owner.
+    match /visitLogs/{visitLogId} {
+      allow read, update, delete: if isOwner(resource.data.userId);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Default deny all other access to collections not explicitly defined
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

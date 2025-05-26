@@ -1,19 +1,15 @@
 import type { LucideIcon } from 'lucide-react';
 import type { User as FirebaseUser } from 'firebase/auth';
 
-// UserRole is still relevant for application logic,
-// but will be associated with a Firebase user via Firestore.
 export type UserRole = 'doctor' | 'nurse' | 'admin';
 
-// Extended Firebase User
 export interface User extends FirebaseUser {
-  // You can extend the FirebaseUser type with app-specific properties
-  // For example, the role will be fetched from Firestore and added here.
-  role?: UserRole; 
+  role?: UserRole;
 }
 
 export interface Patient {
   id: string;
+  userId: string; // ID of the user who owns this patient record
   name: string;
   age: number;
   gender: 'male' | 'female' | 'other';
@@ -30,7 +26,8 @@ export interface Patient {
 
 export interface Medication {
   id: string;
-  patientId: string;
+  userId: string; // ID of the user who owns this medication record
+  patientId: string; // ID of the patient this medication belongs to
   name: string;
   dosage: string;
   frequency: string;
@@ -41,9 +38,10 @@ export interface Medication {
 
 export interface Appointment {
   id:string;
+  userId: string; // ID of the user who owns this appointment
   patientId: string;
   patientName?: string; // For easier display
-  doctorId: string; // This might become a reference to a user ID in Firestore
+  doctorId: string; 
   doctorName?: string; // For easier display
   date: string; // ISO date string
   time: string; // e.g., "10:00 AM"
@@ -62,7 +60,9 @@ export interface NavItem {
 
 export interface VisitLog {
   id: string;
+  userId: string; // ID of the user who created/owns this log
+  patientId: string;
   date: string; // ISO date string
   notes: string;
-  doctorId: string; // This might become a reference to a user ID in Firestore
+  doctorId: string; 
 }
